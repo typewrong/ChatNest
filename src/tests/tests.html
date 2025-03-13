@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ChatNest 功能测试</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    
+    h1 {
+      text-align: center;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 10px;
+      margin-bottom: 20px;
+    }
+    
+    .test-section {
+      background-color: #f9f9f9;
+      border-radius: 5px;
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .test-section h2 {
+      margin-top: 0;
+      margin-bottom: 10px;
+      font-size: 1.2em;
+    }
+    
+    .test-result {
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    
+    .success {
+      color: green;
+    }
+    
+    .failure {
+      color: red;
+    }
+    
+    .test-details {
+      margin-top: 10px;
+      white-space: pre-wrap;
+      background-color: #f0f0f0;
+      border-radius: 3px;
+      padding: 10px;
+      font-family: monospace;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    
+    .run-all-btn {
+      display: block;
+      margin: 20px auto;
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    
+    .run-all-btn:hover {
+      background-color: #45a049;
+    }
+  </style>
+</head>
+<body>
+  <h1>ChatNest 功能测试</h1>
+  
+  <button id="run-all" class="run-all-btn">运行所有测试</button>
+  
+  <div class="test-section" id="indexeddb-test">
+    <h2>IndexedDB 存储测试</h2>
+    <button class="run-test-btn" data-test="indexeddb">运行测试</button>
+    <div class="test-result" id="indexeddb-result">未运行</div>
+    <div class="test-details" id="indexeddb-details"></div>
+  </div>
+  
+  <div class="test-section" id="chrome-storage-test">
+    <h2>Chrome Storage 测试</h2>
+    <button class="run-test-btn" data-test="chromeStorage">运行测试</button>
+    <div class="test-result" id="chromeStorage-result">未运行</div>
+    <div class="test-details" id="chromeStorage-details"></div>
+  </div>
+  
+  <div class="test-section" id="markdown-test">
+    <h2>Markdown 导出测试</h2>
+    <button class="run-test-btn" data-test="markdown">运行测试</button>
+    <div class="test-result" id="markdown-result">未运行</div>
+    <div class="test-details" id="markdown-details"></div>
+  </div>
+  
+  <script type="module">
+    // 导入测试模块
+    import { testIndexedDBStorage, testChromeStorage, testMarkdownExport, runAllTests } from './functionality.test.js';
+    
+    // 更新测试结果UI
+    const updateTestUI = (testName, result) => {
+      const resultElement = document.getElementById(`${testName}-result`);
+      const detailsElement = document.getElementById(`${testName}-details`);
+      
+      if (result.success) {
+        resultElement.textContent = '✅ 通过';
+        resultElement.className = 'test-result success';
+      } else {
+        resultElement.textContent = '❌ 失败';
+        resultElement.className = 'test-result failure';
+      }
+      
+      detailsElement.textContent = result.message;
+      
+      if (testName === 'markdown' && result.markdown) {
+        detailsElement.textContent += '\n\n生成的Markdown:\n' + result.markdown;
+      }
+    };
+    
+    // 单个测试运行器
+    const runTest = async (testName) => {
+      try {
+        let result;
+        
+        switch (testName) {
+          case 'indexeddb':
+            result = await testIndexedDBStorage();
+            break;
+          case 'chromeStorage':
+            result = await testChromeStorage();
+            break;
+          case 'markdown':
+            result = testMarkdownExport();
+            break;
+        }
+        
+        updateTestUI(testName, result);
+      } catch (error) {
+        updateTestUI(testName, {
+          success: false,
+          message: `测试执行错误: ${error.message}`
+        });
+      }
+    };
+    
+    // 绑定单个测试按钮事件
+    document.querySelectorAll('.run-test-btn').forEach(button => {
+      button.addEventListener('click', () => {
+        const testName = button.dataset.test;
+        runTest(testName);
+      });
+    });
+    
+    // 运行所有测试
+    document.getElementById('run-all').addEventListener('click', async () => {
+      try {
+        const results = await runAllTests();
+        
+        updateTestUI('indexeddb', results.indexedDB);
+        updateTestUI('chromeStorage', results.chromeStorage);
+        updateTestUI('markdown', results.markdownExport);
+      } catch (error) {
+        console.error('运行所有测试时发生错误:', error);
+      }
+    });
+  </script>
+</body>
+</html> 

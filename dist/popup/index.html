@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ChatNest</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="../libs/jszip.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <h1 class="title">ChatNest</h1>
+      <p class="subtitle">您的AI对话收藏夹</p>
+    </header>
+    
+    <div class="tabs">
+      <button class="tab-button active" data-platform="all">全部</button>
+      <!-- <button class="tab-button" data-platform="deepseek">DeepSeek</button> -->
+      <button class="tab-button" data-platform="doubao">豆包</button>
+    </div>
+    
+    <!-- <div class="search-bar">
+      <input type="text" id="search-input" placeholder="搜索对话...">
+    </div> -->
+    
+    <div class="conversation-list" id="conversation-list">
+      <!-- 对话列表将通过JavaScript动态生成 -->
+      <div class="empty-state">
+        <p>暂无对话记录</p>
+      </div>
+    </div>
+    
+    <!-- 添加自动提取开关 -->
+    <div class="auto-extract-switch">
+      <span>总是自动提取对话</span>
+      <label class="switch">
+        <input type="checkbox" id="auto-extract-toggle" checked>
+        <span class="slider round"></span>
+      </label>
+    </div>
+    
+    <div class="actions">
+      <button id="export-button" class="action-button">全部导出</button>
+      <!-- <button id="settings-button" class="action-button">设置</button> -->
+    </div>
+  </div>
+  
+  <!-- 添加调试信息显示区域 -->
+  <!-- <div id="debug-info" style="display: none;">
+    <h3>调试信息</h3>
+    <div id="debug-content"></div>
+  </div> -->
+  
+  <script type="module" src="../js/popup.js"></script>
+</body>
+</html>

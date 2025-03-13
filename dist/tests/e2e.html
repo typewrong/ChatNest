@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ChatNest 端到端测试</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    
+    h1 {
+      text-align: center;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 10px;
+      margin-bottom: 20px;
+    }
+    
+    .test-section {
+      background-color: #f9f9f9;
+      border-radius: 5px;
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .test-section h2 {
+      margin-top: 0;
+      margin-bottom: 10px;
+      font-size: 1.2em;
+    }
+    
+    .test-result {
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    
+    .success {
+      color: green;
+    }
+    
+    .failure {
+      color: red;
+    }
+    
+    .pending {
+      color: #888;
+    }
+    
+    .test-details {
+      margin-top: 10px;
+      white-space: pre-wrap;
+      background-color: #f0f0f0;
+      border-radius: 3px;
+      padding: 10px;
+      font-family: monospace;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    
+    .run-all-btn {
+      display: block;
+      margin: 20px auto;
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    
+    .run-all-btn:hover {
+      background-color: #45a049;
+    }
+    
+    .note {
+      background-color: #fff3cd;
+      color: #856404;
+      padding: 10px 15px;
+      border-radius: 4px;
+      margin-bottom: 20px;
+      font-size: 0.9em;
+    }
+  </style>
+</head>
+<body>
+  <h1>ChatNest 端到端测试</h1>
+  
+  <div class="note">
+    <strong>注意：</strong> 这些测试需要在扩展环境中运行，并且需要访问Chrome API和模拟用户交互。请确保已经安装了ChatNest扩展。
+  </div>
+  
+  <button id="run-all" class="run-all-btn">运行所有测试</button>
+  
+  <div class="test-section" id="popup-test">
+    <h2>Popup页面测试</h2>
+    <button class="run-test-btn" data-test="popup">运行测试</button>
+    <div class="test-result pending" id="popup-result">未运行</div>
+    <div class="test-details" id="popup-details"></div>
+  </div>
+  
+  <div class="test-section" id="data-loading-test">
+    <h2>数据加载测试</h2>
+    <button class="run-test-btn" data-test="dataLoading">运行测试</button>
+    <div class="test-result pending" id="dataLoading-result">未运行</div>
+    <div class="test-details" id="dataLoading-details"></div>
+  </div>
+  
+  <div class="test-section" id="export-function-test">
+    <h2>导出功能测试</h2>
+    <button class="run-test-btn" data-test="exportFunction">运行测试</button>
+    <div class="test-result pending" id="exportFunction-result">未运行</div>
+    <div class="test-details" id="exportFunction-details"></div>
+  </div>
+  
+  <script type="module">
+    // 导入测试模块
+    import { testPopupPage, testDataLoading, testExportFunction, runAllE2ETests } from './e2e.test.js';
+    
+    // 更新测试结果UI
+    const updateTestUI = (testName, result) => {
+      const resultElement = document.getElementById(`${testName}-result`);
+      const detailsElement = document.getElementById(`${testName}-details`);
+      
+      if (!resultElement || !detailsElement) return;
+      
+      if (result.success) {
+        resultElement.textContent = '✅ 通过';
+        resultElement.className = 'test-result success';
+      } else {
+        resultElement.textContent = '❌ 失败';
+        resultElement.className = 'test-result failure';
+      }
+      
+      detailsElement.textContent = result.message || '没有详细信息';
+    };
+    
+    // 单个测试运行器
+    const runTest = async (testName) => {
+      try {
+        // 更新UI状态
+        const resultElement = document.getElementById(`${testName}-result`);
+        const detailsElement = document.getElementById(`${testName}-details`);
+        
+        if (resultElement && detailsElement) {
+          resultElement.textContent = '🔄 运行中...';
+          resultElement.className = 'test-result pending';
+          detailsElement.textContent = '测试正在运行，请稍候...';
+        }
+        
+        let result;
+        
+        switch (testName) {
+          case 'popup':
+            result = await testPopupPage();
+            break;
+          case 'dataLoading':
+            result = await testDataLoading();
+            break;
+          case 'exportFunction':
+            result = await testExportFunction();
+            break;
+          default:
+            throw new Error(`未知的测试: ${testName}`);
+        }
+        
+        updateTestUI(testName, result);
+      } catch (error) {
+        console.error(`运行测试 ${testName} 时发生错误:`, error);
+        
+        const resultElement = document.getElementById(`${testName}-result`);
+        const detailsElement = document.getElementById(`${testName}-details`);
+        
+        if (resultElement && detailsElement) {
+          resultElement.textContent = '❌ 失败';
+          resultElement.className = 'test-result failure';
+          detailsElement.textContent = `测试执行错误: ${error.message}`;
+        }
+      }
+    };
+    
+    // 绑定单个测试按钮事件
+    document.querySelectorAll('.run-test-btn').forEach(button => {
+      button.addEventListener('click', () => {
+        const testName = button.dataset.test;
+        runTest(testName);
+      });
+    });
+    
+    // 运行所有测试
+    document.getElementById('run-all').addEventListener('click', async () => {
+      try {
+        // 更新所有测试状态为运行中
+        document.querySelectorAll('.test-result').forEach(el => {
+          el.textContent = '🔄 运行中...';
+          el.className = 'test-result pending';
+        });
+        
+        document.querySelectorAll('.test-details').forEach(el => {
+          el.textContent = '测试正在运行，请稍候...';
+        });
+        
+        const results = await runAllE2ETests();
+        
+        if (results.error) {
+          console.error('运行所有测试时发生错误:', results.error);
+          return;
+        }
+        
+        // 更新各个测试结果
+        if (results.popupPage) {
+          updateTestUI('popup', results.popupPage);
+        }
+        
+        if (results.dataLoading) {
+          updateTestUI('dataLoading', results.dataLoading);
+        }
+        
+        if (results.exportFunction) {
+          updateTestUI('exportFunction', results.exportFunction);
+        }
+      } catch (error) {
+        console.error('运行所有测试时发生错误:', error);
+      }
+    });
+  </script>
+</body>
+</html> 

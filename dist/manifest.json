@@ -1,0 +1,48 @@
+{
+  "manifest_version": 3,
+  "name": "ChatNest",
+  "version": "0.1.0",
+  "description": "收藏各个chatbot的对话记录",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_popup": "popup/index.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "background": {
+    "service_worker": "js/background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://chat.deepseek.com/*"],
+      "js": ["js/content.js", "js/deepseek.js"]
+    },
+    {
+      "matches": ["https://www.doubao.com/*"],
+      "js": ["js/content.js", "js/doubao.js"]
+    }
+  ],
+  "permissions": [
+    "storage",
+    "tabs",
+    "downloads"
+  ],
+  "host_permissions": [
+    "https://chat.deepseek.com/*",
+    "https://www.doubao.com/*"
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["assets/*", "icons/*", "js/*", "popup/*"],
+      "matches": ["https://chat.deepseek.com/*", "https://www.doubao.com/*", "<all_urls>"]
+    }
+  ]
+} 

@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ChatNest 兼容性测试</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    
+    h1 {
+      text-align: center;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 10px;
+      margin-bottom: 20px;
+    }
+    
+    .card {
+      background-color: #f9f9f9;
+      border-radius: 5px;
+      padding: 15px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .card h2 {
+      margin-top: 0;
+      margin-bottom: 10px;
+      font-size: 1.2em;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 5px;
+    }
+    
+    .test-result {
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    
+    .success {
+      color: green;
+    }
+    
+    .failure {
+      color: red;
+    }
+    
+    .pending {
+      color: #888;
+    }
+    
+    .run-btn {
+      display: block;
+      margin: 20px auto;
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    
+    .run-btn:hover {
+      background-color: #45a049;
+    }
+    
+    .note {
+      background-color: #fff3cd;
+      color: #856404;
+      padding: 10px 15px;
+      border-radius: 4px;
+      margin-bottom: 20px;
+      font-size: 0.9em;
+    }
+    
+    .browser-info {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    
+    .browser-info div {
+      flex: 1;
+      min-width: 200px;
+      padding: 10px;
+      background-color: #e9ecef;
+      border-radius: 4px;
+    }
+    
+    .compatibility-score {
+      text-align: center;
+      font-size: 1.5em;
+      margin: 20px 0;
+    }
+    
+    .progress-container {
+      height: 20px;
+      background-color: #e9ecef;
+      border-radius: 10px;
+      margin: 10px 0;
+      overflow: hidden;
+    }
+    
+    .progress-bar {
+      height: 100%;
+      background-color: #4CAF50;
+      border-radius: 10px;
+      transition: width 0.5s ease-in-out;
+    }
+    
+    .api-test {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 15px;
+    }
+    
+    .api-item {
+      flex: 1;
+      min-width: 120px;
+      padding: 10px;
+      background-color: #f0f0f0;
+      border-radius: 4px;
+      text-align: center;
+    }
+    
+    .api-name {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    
+    .copy-btn {
+      padding: 5px 10px;
+      background-color: #6c757d;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.8em;
+      margin-left: 10px;
+    }
+    
+    .copy-btn:hover {
+      background-color: #5a6268;
+    }
+  </style>
+</head>
+<body>
+  <h1>ChatNest 兼容性测试</h1>
+  
+  <div class="note">
+    <strong>注意：</strong> 这些测试检查浏览器和扩展API的兼容性，帮助确定ChatNest在不同环境下可能遇到的问题。
+  </div>
+  
+  <button id="run-tests" class="run-btn">运行兼容性测试</button>
+  
+  <div class="card" id="browser-info-card">
+    <h2>浏览器信息</h2>
+    <div class="browser-info" id="browser-info-container">
+      <div>名称: <span id="browser-name">未检测</span></div>
+      <div>版本: <span id="browser-version">未检测</span></div>
+      <div>平台: <span id="browser-platform">未检测</span></div>
+    </div>
+    <div id="user-agent" style="font-size: 0.8em; margin-top: 10px; word-break: break-all;">User Agent: 未检测</div>
+  </div>
+  
+  <div class="card" id="compatibility-score-card">
+    <h2>兼容性得分</h2>
+    <div class="compatibility-score" id="compatibility-score">未检测</div>
+    <div class="progress-container">
+      <div class="progress-bar" id="compatibility-progress-bar" style="width: 0%"></div>
+    </div>
+    <div style="text-align: center;" id="compatibility-details">运行测试以查看详细信息</div>
+  </div>
+  
+  <div class="card" id="api-availability-card">
+    <h2>API可用性</h2>
+    <div class="api-test" id="api-test-container">
+      <div class="api-item">
+        <div class="api-name">Chrome API</div>
+        <div class="test-result pending" id="chrome-api-result">未检测</div>
+      </div>
+      <div class="api-item">
+        <div class="api-name">IndexedDB</div>
+        <div class="test-result pending" id="indexeddb-result">未检测</div>
+      </div>
+      <div class="api-item">
+        <div class="api-name">localStorage</div>
+        <div class="test-result pending" id="localstorage-result">未检测</div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="card" id="chrome-api-card">
+    <h2>Chrome API详情</h2>
+    <div class="api-test" id="chrome-api-details">
+      <div class="api-item">
+        <div class="api-name">Storage</div>
+        <div class="test-result pending" id="chrome-storage-result">未检测</div>
+      </div>
+      <div class="api-item">
+        <div class="api-name">Runtime</div>
+        <div class="test-result pending" id="chrome-runtime-result">未检测</div>
+      </div>
+      <div class="api-item">
+        <div class="api-name">Tabs</div>
+        <div class="test-result pending" id="chrome-tabs-result">未检测</div>
+      </div>
+      <div class="api-item">
+        <div class="api-name">Downloads</div>
+        <div class="test-result pending" id="chrome-downloads-result">未检测</div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="card" id="test-results-card">
+    <h2>测试结果 <button id="copy-results" class="copy-btn">复制结果</button></h2>
+    <pre id="test-results" style="white-space: pre-wrap; background-color: #f0f0f0; padding: 10px; border-radius: 4px; max-height: 300px; overflow-y: auto;">运行测试以查看结果</pre>
+  </div>
+  
+  <script type="module">
+    import { getBrowserInfo, checkAPIAvailability, checkLocalStorageAccess, checkIndexedDBAccess, checkChromeAPIAccess, runCompatibilityTests } from './compatibility.test.js';
+    
+    // 更新UI显示测试结果
+    const updateUI = (results) => {
+      // 更新浏览器信息
+      document.getElementById('browser-name').textContent = results.browserInfo.name;
+      document.getElementById('browser-version').textContent = results.browserInfo.version;
+      document.getElementById('browser-platform').textContent = results.browserInfo.platform;
+      document.getElementById('user-agent').textContent = `User Agent: ${results.browserInfo.userAgent}`;
+      
+      // 更新兼容性得分
+      document.getElementById('compatibility-score').textContent = `${results.compatibilityScore.score}/${results.compatibilityScore.total} (${results.compatibilityScore.percentage}%)`;
+      document.getElementById('compatibility-progress-bar').style.width = `${results.compatibilityScore.percentage}%`;
+      
+      if (results.compatibilityScore.percentage >= 80) {
+        document.getElementById('compatibility-details').textContent = '兼容性良好，应该能够正常运行';
+        document.getElementById('compatibility-details').className = 'success';
+      } else if (results.compatibilityScore.percentage >= 50) {
+        document.getElementById('compatibility-details').textContent = '兼容性一般，可能会遇到一些问题';
+        document.getElementById('compatibility-details').className = 'pending';
+      } else {
+        document.getElementById('compatibility-details').textContent = '兼容性较差，可能无法正常运行';
+        document.getElementById('compatibility-details').className = 'failure';
+      }
+      
+      // 更新API可用性
+      updateTestResult('chrome-api', results.apiAvailability.chrome.available);
+      updateTestResult('indexeddb', results.apiAvailability.indexedDB.available);
+      updateTestResult('localstorage', results.apiAvailability.localStorage.available);
+      
+      // 更新Chrome API详情
+      updateTestResult('chrome-storage', results.chromeAPI.storage.success);
+      updateTestResult('chrome-runtime', results.chromeAPI.runtime.success);
+      updateTestResult('chrome-tabs', results.chromeAPI.tabs.success);
+      updateTestResult('chrome-downloads', results.chromeAPI.downloads.success);
+      
+      // 更新测试结果文本
+      document.getElementById('test-results').textContent = JSON.stringify(results, null, 2);
+    };
+    
+    // 更新单个测试结果
+    const updateTestResult = (id, success) => {
+      const element = document.getElementById(`${id}-result`);
+      if (element) {
+        element.textContent = success ? '✓ 可用' : '✗ 不可用';
+        element.className = `test-result ${success ? 'success' : 'failure'}`;
+      }
+    };
+    
+    // 绑定运行测试按钮事件
+    document.getElementById('run-tests').addEventListener('click', async () => {
+      try {
+        // 更改按钮状态
+        const button = document.getElementById('run-tests');
+        button.textContent = '测试运行中...';
+        button.disabled = true;
+        
+        // 重置所有测试结果为"测试中"
+        document.querySelectorAll('.test-result').forEach(el => {
+          el.textContent = '测试中...';
+          el.className = 'test-result pending';
+        });
+        
+        // 运行测试
+        const results = await runCompatibilityTests();
+        
+        // 更新UI
+        updateUI(results);
+      } catch (error) {
+        console.error('运行兼容性测试时发生错误:', error);
+        document.getElementById('test-results').textContent = `运行测试时发生错误: ${error.message}`;
+      } finally {
+        // 恢复按钮状态
+        const button = document.getElementById('run-tests');
+        button.textContent = '运行兼容性测试';
+        button.disabled = false;
+      }
+    });
+    
+    // 绑定复制结果按钮事件
+    document.getElementById('copy-results').addEventListener('click', () => {
+      const text = document.getElementById('test-results').textContent;
+      navigator.clipboard.writeText(text)
+        .then(() => {
+          const button = document.getElementById('copy-results');
+          button.textContent = '已复制';
+          setTimeout(() => {
+            button.textContent = '复制结果';
+          }, 2000);
+        })
+        .catch(err => {
+          console.error('无法复制测试结果:', err);
+        });
+    });
+  </script>
+</body>
+</html> 

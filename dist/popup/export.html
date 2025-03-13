@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ChatNest - 导出对话</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <style>
+    .export-container {
+      padding: 20px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    .progress-container {
+      margin: 20px 0;
+      background-color: #f3f4f6;
+      border-radius: 8px;
+      height: 20px;
+      overflow: hidden;
+    }
+    
+    .progress-value {
+      height: 100%;
+      background-color: #2563eb;
+      width: 0%;
+      transition: width 0.3s;
+    }
+    
+    .export-list {
+      margin-top: 20px;
+    }
+    
+    .export-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    
+    .export-item:last-child {
+      border-bottom: none;
+    }
+    
+    .export-title {
+      flex-grow: 1;
+      margin-right: 10px;
+    }
+    
+    .export-status {
+      font-size: 0.8rem;
+      color: #6b7280;
+    }
+    
+    .export-status.success {
+      color: #10b981;
+    }
+    
+    .export-status.error {
+      color: #ef4444;
+    }
+    
+    .export-actions {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+    
+    .platform-filter {
+      display: flex;
+      margin-bottom: 15px;
+      gap: 10px;
+    }
+    
+    .platform-filter button {
+      padding: 5px 10px;
+      border: 1px solid #d1d5db;
+      background-color: #f9fafb;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    
+    .platform-filter button.active {
+      background-color: #2563eb;
+      color: white;
+      border-color: #2563eb;
+    }
+    
+    .search-filter {
+      margin-bottom: 15px;
+    }
+    
+    .search-filter input {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #d1d5db;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="export-container">
+    <h1>导出对话</h1>
+    
+    <div class="platform-filter">
+      <button class="platform-btn active" data-platform="all">全部</button>
+      <!-- <button class="platform-btn" data-platform="deepseek">DeepSeek</button> -->
+      <button class="platform-btn" data-platform="doubao">豆包</button>
+    </div>
+    
+    <div class="search-filter">
+      <input type="text" id="keyword-filter" placeholder="搜索关键词...">
+    </div>
+    
+    <div class="progress-container">
+      <div id="progress-value" class="progress-value"></div>
+    </div>
+    
+    <div id="status-message">正在加载对话内容...</div>
+    
+    <div id="export-list" class="export-list"></div>
+    
+    <div class="export-actions">
+      <button id="export-all" class="action-button">导出全部对话</button>
+      <!-- <button id="back-button" class="action-button" style="background-color: #6b7280;">返回</button> -->
+    </div>
+  </div>
+  
+  <script type="module" src="../js/export.js"></script>
+</body>
+</html> 
